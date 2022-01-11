@@ -7,61 +7,77 @@ function updateGameArea() {
     myGameArea.clear();
     myGameArea.drawGameObject(ninja);
     ninja.update();
-    myGameArea.draw(blocco1);
     myGameArea.draw(ninja);
     movement();
 
+    
+    if (keyboard.spacebar) {
+        myGameArea.draw(bomba)
+        bomba.explosionF();
+        if (bomba.exploded) {
+            myGameArea.draw(bomba.explosion.hrzEx);
+            myGameArea.draw(bomba.explosion.vrtEx);
+        }
+    }
 }
 function collisioni(blocco) {
     if (ninja.y < (blocco.y + blocco.height) & (ninja.y + ninja.height) > blocco.y){
-        if ((ninja.x + ninja.width + hsp) > blocco.x & ninja.x + hsp < (blocco.x + blocco.width)){
-           hsp = 0;
+        if ((ninja.x + ninja.width + ninja.hsp) > blocco.x & ninja.x + ninja.hsp < (blocco.x + blocco.width)){
+           ninja.hsp = 0;
         }
     }
     if (ninja.x < (blocco.x + blocco.width) & (ninja.x + ninja.width) > blocco.x){
-        if ((ninja.y + ninja.height + vsp) > blocco.y & ninja.y + vsp < (blocco.y + blocco.height)){
-           vsp = 0;
+        if ((ninja.y + ninja.height + ninja.vsp) > blocco.y & ninja.y + ninja.vsp < (blocco.y + blocco.height)){
+           ninja.vsp = 0;
         }
      }
      
 }
 function border() {
-    if (ninja.x + hsp < 0) {
-        hsp = 0; 
+    if (ninja.x + ninja.hsp < 0) {
+        ninja.hsp = 0; 
     }
-    if (ninja.y + vsp < 0) {
-        vsp = 0; 
+    if (ninja.y + ninja.vsp < 0) {
+        ninja.vsp = 0; 
     }
-    if (ninja.x + hsp + ninja.width > 1080) {
-        hsp = 0; 
+    if (ninja.x + ninja.hsp + ninja.width > myGameArea.canvas.width) {
+        ninja.hsp = 0; 
     }
-    if (ninja.y + vsp + ninja.height > 720) {
-        vsp = 0; 
+    if (ninja.y + ninja.vsp + ninja.height > myGameArea.canvas.height) {
+        ninja.vsp = 0; 
+    }
+}
+
+function blocchiF() {
+    for(let i = 0; i < blocchi.length; i++) {
+        myGameArea.draw(blocchi[i]);
+        collisioni(blocchi[i]);
     }
 }
 
 function movement() {
-    hsp = 3 * (keyboard.right - keyboard.left);
-    vsp = 3 * (keyboard.down - keyboard.up);
+    ninja.hsp = 3 * (keyboard.right - keyboard.left);
+    ninja.vsp = 3 * (keyboard.down - keyboard.up);
 
-    collisioni(blocco1);
     border();
+    blocchiF();
 
-    ninja.x += hsp;
-    ninja.y += vsp;
+    ninja.x += ninja.hsp;
+    ninja.y += ninja.vsp;
 }
 
 var keyboard = {
     up: false,
     down: false,
     left: false,
-    right: false
+    right: false,
+    spacebar: false
 }
 
 var myGameArea = {  
     canvas : document.createElement("canvas"),
     start : function() {
-        this.canvas.width = 1080;
+        this.canvas.width = 1100;
         this.canvas.height = 720;
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
@@ -85,22 +101,59 @@ var myGameArea = {
     } ,
 }
 
-let hsp = 0;
-let vsp = 0;
+var bomba = {
+    x: 0,
+    y: 0,
+    width: 60,
+    height: 60,
+    color: "black",
+    place: false,
+    timer: 2500,
+    exploded: false,
 
-var blocco1 = {
-    width: 50,
-    height: 50,
-    x: 50,
-    y: 50 ,
-    color: "grey",
+    explosion: {
+        hrzEx : {
+            x: 0,
+            y: 0,
+            width: 300,
+            height: 60
+        } ,
+        vrtEx : {
+            x: 0,
+            y: 0,
+            width: 60,
+            height: 300
+        }
+    } ,
+    explosionF: function() {
+        if (!bomba.place ) {
+            bomba.x = ninja.x;
+            bomba.y = ninja.y;
+        }
+        console.log(bomba.place)
+        switch (bomba.timer) {
+            case 2500: bomba.place = true;
+            bomba.timer--;
+            break;
+            case 0: this.exploded = true;
+            bomba.timer--;
+            break;
+            case -500: 
+                this.exploded = false;
+                this.place = false;
+                bomba.timer--;
+                keyboard.spacebar = false;
+            break;
+            default: bomba.timer--;
+        }
+    } 
 }
 
 var ninja = {
-    width: 40,
-    height: 40,
+    width: 80,
+    height: 80,
     x: 10,
-    y: 120,
+    y: 300,
     hsp: 0,
     vsp: 0,
     color: "yellow", 
@@ -127,13 +180,6 @@ var ninja = {
     } 
 };
 
-var bomba = {
-    width: 40, 
-    height: 40,
-    x: ninja.x ,
-    y: ninja.y ,
-}
-
 document.addEventListener('keydown', function(event) {
     switch (event.key) {
         case "ArrowLeft": keyboard.left = true;
@@ -143,6 +189,8 @@ document.addEventListener('keydown', function(event) {
         case "ArrowUp": keyboard.up = true;
         break;
         case "ArrowDown": keyboard.down = true;
+        break;
+        case " ": keyboard.spacebar = true;
         break;
     }
 });
@@ -160,11 +208,113 @@ document.addEventListener('keyup', function(event) {
     }
 });
 
-class Blocco {
-    constructor(x , y) {
-        this.x = x;
-        this.y = y;
-        this.height = 50;
-        this.width = 50;
-    }
-}
+//ArrayBlocchi
+blocchi = [
+    {
+        width : 100, 
+        height : 100, 
+        x: 100, 
+        y: 100, 
+        color: "grey"
+    } ,
+    {
+        width : 100, 
+        height : 100, 
+        x: 300, 
+        y: 100,
+        color: "grey"
+    } ,
+    {
+        width : 100, 
+        height : 100, 
+        x: 500, 
+        y: 100,
+        color: "grey"
+    } ,
+    {
+        width : 100, 
+        height : 100, 
+        x: 700, 
+        y: 100,
+        color: "grey"
+    } ,
+    {
+        width : 100, 
+        height : 100, 
+        x: 900, 
+        y: 100,
+        color: "grey"
+    } ,
+    //2nd
+    {
+        width : 100, 
+        height : 100, 
+        x: 100, 
+        y: 300, 
+        color: "grey"
+    } ,
+    {
+        width : 100, 
+        height : 100, 
+        x: 300, 
+        y: 300,
+        color: "grey"
+    } ,
+    {
+        width : 100, 
+        height : 100, 
+        x: 500, 
+        y: 300,
+        color: "grey"
+    } ,
+    {
+        width : 100, 
+        height : 100, 
+        x: 700, 
+        y: 300,
+        color: "grey"
+    } ,
+    {
+        width : 100, 
+        height : 100, 
+        x: 900, 
+        y: 300,
+        color: "grey"
+    } ,
+    //3rd
+    {
+        width : 100, 
+        height : 100, 
+        x: 100, 
+        y: 500, 
+        color: "grey"
+    } ,
+    {
+        width : 100, 
+        height : 100, 
+        x: 300, 
+        y: 500,
+        color: "grey"
+    } ,
+    {
+        width : 100, 
+        height : 100, 
+        x: 500, 
+        y: 500,
+        color: "grey"
+    } ,
+    {
+        width : 100, 
+        height : 100, 
+        x: 700, 
+        y: 500,
+        color: "grey"
+    } ,
+    {
+        width : 100, 
+        height : 100, 
+        x: 900, 
+        y: 500,
+        color: "grey"
+    } ,
+];
