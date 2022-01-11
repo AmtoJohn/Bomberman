@@ -1,0 +1,12 @@
+body {
+    background-color : rgb(68, 67, 67)
+}
+canvas {
+    border: 1px solid #d3d3d3;
+    background-color: green;
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
