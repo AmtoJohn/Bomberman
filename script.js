@@ -7,7 +7,6 @@ function updateGameArea() {
     myGameArea.clear();
     myGameArea.drawGameObject(ninja);
     ninja.update();
-    myGameArea.draw(ninja);
     movement();
 
     
@@ -156,10 +155,9 @@ var ninja = {
     y: 300,
     hsp: 0,
     vsp: 0,
-    color: "yellow", 
     imageList: [], 
     contaFrame: 0, 
-    actualFrame: 0,
+    actualFrame: 0, 
     update: function() {
         this.contaFrame++;
         if (this.contaFrame == 5) {
